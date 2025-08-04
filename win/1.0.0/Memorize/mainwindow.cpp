@@ -8,7 +8,7 @@
 #include <functional>
 #include "tutorial.h"
 #include <QTranslator>
-#include <QApplication> 
+#include <QApplication>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,27 +26,38 @@ MainWindow::MainWindow(QWidget *parent)
     QTranslator *translatorArSA = new QTranslator(this);
     QTranslator *translatorFrFR = new QTranslator(this);
     QTranslator *translatorBoCN = new QTranslator(this);
-    QTranslator *translatorUgCN = new QTranslator(this);  // 添加维吾尔语翻译器
-    QTranslator *translatorKkCN = new QTranslator(this);  // 添加哈萨克语翻译器
-    QTranslator *translatorSyrSY = new QTranslator(this);  // 添加叙利亚语翻译器
-    QTranslator *translatorEsES = new QTranslator(this);  // 添加西班牙语翻译器
-    QTranslator *translatorRuRU = new QTranslator(this);  // 添加俄语翻译器
+    QTranslator *translatorUgCN = new QTranslator(this);
+    QTranslator *translatorKkCN = new QTranslator(this);
+    QTranslator *translatorSyrSY = new QTranslator(this);
+    QTranslator *translatorEsES = new QTranslator(this);
+    QTranslator *translatorRuRU = new QTranslator(this);
 
     translators["zh_CN"] = translatorZhCN;
-    translators["en"] = translatorEn;
+    translators["en_US"] = translatorEn;
     translators["zh_TW"] = translatorZhTW;
     translators["ar_SA"] = translatorArSA;
     translators["fr_FR"] = translatorFrFR;
     translators["bo_CN"] = translatorBoCN;
-    translators["ug_CN"] = translatorUgCN;  // 添加到翻译器映射
-    translators["kk_CN"] = translatorKkCN;  // 添加哈萨克语到映射
-    translators["syr_SY"] = translatorSyrSY;  // 添加叙利亚语到映射
-    translators["es_ES"] = translatorEsES;  // 添加西班牙语到映射
-    translators["ru_RU"] = translatorRuRU;  // 添加俄语到映射
+    translators["ug_CN"] = translatorUgCN;
+    translators["kk_CN"] = translatorKkCN;
+    translators["syr_SY"] = translatorSyrSY;
+    translators["es_ES"] = translatorEsES;
+    translators["ru_RU"] = translatorRuRU;
+
+    // 设置语言动作组
+    setupLanguageActions();
 
     // 加载并应用保存的语言偏好
     QString lastLanguage = settings->value("LastLanguage", "en_US").toString();
-    changeLanguage(lastLanguage);
+    QAction *lastAction = ui->menuLanguage->actions().first(); // 默认英语
+    for (QAction *action : ui->menuLanguage->actions()) {
+        if (action->data().toString() == lastLanguage) {
+            lastAction = action;
+            break;
+        }
+    }
+    lastAction->setChecked(true);
+    changeLanguage(lastAction);
 
     // 创建堆栈窗口
     stackedWidget = new QStackedWidget();
@@ -75,13 +86,13 @@ MainWindow::MainWindow(QWidget *parent)
     // 初始化删除按钮为禁用状态
     ui->actionDelete->setEnabled(false);
 
-    // 连接表格选择变化信号（在设置模型后连接）
+    // 连接表格选择变化信号
     connect(ui->WordList->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &MainWindow::onWordListSelectionChanged);
 
-    // 添加委托设置 - 修复：将委托设置到第5列（索引4）
+    // 添加委托设置
     playDelegate = new PlayButtonDelegate(this);
-    ui->WordList->setItemDelegateForColumn(4, playDelegate); // 索引4是第5列
+    ui->WordList->setItemDelegateForColumn(4, playDelegate);
     connect(playDelegate, &PlayButtonDelegate::playClicked, [this](const QString &word) {
         speech->say(word);
     });
@@ -98,8 +109,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::on_actionExit_triggered);
     connect(ui->actionHome, &QAction::triggered, this, &MainWindow::on_actionHome_triggered);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showAboutDialog);
-    connect(ui->actionFlashcard, &QAction::triggered, this, &MainWindow::on_actionFlashcard_triggered); // 连接flashcard按钮信号与槽
-
+    connect(ui->actionFlashcard, &QAction::triggered, this, &MainWindow::on_actionFlashcard_triggered);
 
     connect(ui->actiontutorial, &QAction::triggered, this, [this]() {
         Tutorial tutorial(this);
@@ -473,75 +483,11 @@ void MainWindow::on_actionFlashcard_triggered()
 }
 
 
-void MainWindow::on_actionSChinese_triggered()
-{
-    changeLanguage("zh_CN");
-    settings->setValue("LastLanguage", "zh_CN");
-}
 
-void MainWindow::on_actionEnglish_triggered()
+void MainWindow::changeLanguage(QAction *action)
 {
-    changeLanguage("en");
-    settings->setValue("LastLanguage", "en");
-}
+    QString languageCode = action->data().toString();
 
-void MainWindow::on_actionTChinese_triggered()
-{
-    changeLanguage("zh_TW");
-    settings->setValue("LastLanguage", "zh_TW");
-}
-
-void MainWindow::on_actionArabic_triggered()
-{
-    changeLanguage("ar_SA");
-    settings->setValue("LastLanguage", "ar_SA");
-}
-
-void MainWindow::on_actionFrench_triggered()
-{
-    changeLanguage("fr_FR");
-    settings->setValue("LastLanguage", "fr_FR");
-}
-
-void MainWindow::on_actionTibetan_triggered()
-{
-    changeLanguage("bo_CN");
-    settings->setValue("LastLanguage", "bo_CN");
-}
-
-void MainWindow::on_actionUyghur_triggered()
-{
-    changeLanguage("ug_CN");
-    settings->setValue("LastLanguage", "ug_CN");
-}
-
-void MainWindow::on_actionKazakh_triggered()
-{
-    changeLanguage("kk_CN");
-    settings->setValue("LastLanguage", "kk_CN");
-}
-
-void MainWindow::on_actionSyriac_triggered()
-{
-    changeLanguage("syr_SY");
-    settings->setValue("LastLanguage", "syr_SY");
-}
-
-void MainWindow::on_actionSpanish_triggered()
-{
-    changeLanguage("es_ES");
-    settings->setValue("LastLanguage", "es_ES");
-}
-
-// 添加俄语槽函数实现
-void MainWindow::on_actionRussian_triggered()
-{
-    changeLanguage("ru_RU");
-    settings->setValue("LastLanguage", "ru_RU");
-}
-
-void MainWindow::changeLanguage(const QString &languageCode)
-{
     // 移除当前所有翻译器
     for (auto translator : translators.values()) {
         qApp->removeTranslator(translator);
@@ -550,37 +496,17 @@ void MainWindow::changeLanguage(const QString &languageCode)
     // 加载新翻译
     if (translators.contains(languageCode)) {
         QTranslator *translator = translators[languageCode];
-        QString qmFile;
+        QString qmFile = QString("Memorize_%1.qm").arg(languageCode);
 
-        if (languageCode == "zh_CN") {
-            qmFile = "Memorize_zh_CN.qm";
-        } else if (languageCode == "en") {
-            qmFile = "Memorize_en_US.qm";
-        } else if (languageCode == "zh_TW") {
-            qmFile = "Memorize_zh_TW.qm";
-        } else if (languageCode == "ar_SA") {
-            qmFile = "Memorize_ar_SA.qm";
-        } else if (languageCode == "fr_FR") {
-            qmFile = "Memorize_fr_FR.qm";
-        } else if (languageCode == "bo_CN") {
-            qmFile = "Memorize_bo_CN.qm";
-        } else if (languageCode == "ug_CN") {
-            qmFile = "Memorize_ug_CN.qm";
-        } else if (languageCode == "kk_CN") {
-            qmFile = "Memorize_kk_CN.qm";
-        } else if (languageCode == "syr_SY") {
-            qmFile = "Memorize_syr_SY.qm";
-        } else if (languageCode == "es_ES") {
-            qmFile = "Memorize_es_ES.qm";
-        } else if (languageCode == "ru_RU") {
-            qmFile = "Memorize_ru_RU.qm";
-        }
         if (translator->load(qmFile, qApp->applicationDirPath())) {
             qApp->installTranslator(translator);
         } else {
             qDebug() << "Failed to load translation file for" << languageCode;
         }
     }
+
+    // 保存语言偏好
+    settings->setValue("LastLanguage", languageCode);
 
     // 重新翻译UI
     ui->retranslateUi(this);
@@ -597,4 +523,68 @@ void MainWindow::changeLanguage(const QString &languageCode)
         // 假设StatisticsWidget有retranslate方法
         // statisticsWidget->retranslateUi();
     }
+}
+
+void MainWindow::setupLanguageActions()
+{
+    languageActionGroup = new QActionGroup(this);
+
+    // 创建语言动作并添加到动作组
+    QAction *englishAction = ui->actionEnglish;
+    englishAction->setData("en");
+    englishAction->setCheckable(true);
+    languageActionGroup->addAction(englishAction);
+
+    QAction *chineseAction = ui->actionSChinese;
+    chineseAction->setData("zh_CN");
+    chineseAction->setCheckable(true);
+    languageActionGroup->addAction(chineseAction);
+
+    QAction *tchineseAction = ui->actionTChinese;
+    tchineseAction->setData("zh_TW");
+    tchineseAction->setCheckable(true);
+    languageActionGroup->addAction(tchineseAction);
+
+    QAction *arabicAction = ui->actionArabic;
+    arabicAction->setData("ar_SA");
+    arabicAction->setCheckable(true);
+    languageActionGroup->addAction(arabicAction);
+
+    QAction *frenchAction = ui->actionFrench;
+    frenchAction->setData("fr_FR");
+    frenchAction->setCheckable(true);
+    languageActionGroup->addAction(frenchAction);
+
+    QAction *tibetanAction = ui->actionTibetan;
+    tibetanAction->setData("bo_CN");
+    tibetanAction->setCheckable(true);
+    languageActionGroup->addAction(tibetanAction);
+
+    QAction *uyghurAction = ui->actionUyghur;
+    uyghurAction->setData("ug_CN");
+    uyghurAction->setCheckable(true);
+    languageActionGroup->addAction(uyghurAction);
+
+    QAction *kazakhAction = ui->actionKazakh;
+    kazakhAction->setData("kk_CN");
+    kazakhAction->setCheckable(true);
+    languageActionGroup->addAction(kazakhAction);
+
+    QAction *syriacAction = ui->actionSyriac;
+    syriacAction->setData("syr_SY");
+    syriacAction->setCheckable(true);
+    languageActionGroup->addAction(syriacAction);
+
+    QAction *spanishAction = ui->actionSpanish;
+    spanishAction->setData("es_ES");
+    spanishAction->setCheckable(true);
+    languageActionGroup->addAction(spanishAction);
+
+    QAction *russianAction = ui->actionRussian;
+    russianAction->setData("ru_RU");
+    russianAction->setCheckable(true);
+    languageActionGroup->addAction(russianAction);
+
+    // 连接所有语言动作到一个槽函数
+    connect(languageActionGroup, &QActionGroup::triggered, this, &MainWindow::changeLanguage);
 }

@@ -6,7 +6,6 @@
 #include <QStandardItemModel>
 #include <QSettings>
 #include <QTextToSpeech>
-#include <QMediaPlayer>
 #include <QLabel>
 #include <QPushButton>
 #include <QStackedWidget>
@@ -14,7 +13,6 @@
 #include <QVBoxLayout>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QInputDialog>
 #include <QTimer>
 #include <QTime>
 #include <QButtonGroup>
@@ -32,9 +30,9 @@
 #include <QFileInfo>
 #include <QPainter>
 #include <QItemDelegate>
-#include <QTranslator>  // 保留这行
-#include <QMap>  // 添加这行
-
+#include <QTranslator>
+#include <QMap>
+#include <QActionGroup>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -82,17 +80,7 @@ private slots:
     void onWordListSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void on_actionDelete_triggered();
     void on_actionFlashcard_triggered();
-    void on_actionSChinese_triggered();  // 添加中文语言切换槽函数
-    void on_actionEnglish_triggered();  // 添加英文语言切换槽函数
-    void on_actionTChinese_triggered();  // 添加繁体中文语言切换槽函数
-    void on_actionArabic_triggered();  // 添加阿拉伯语语言切换槽函数
-    void on_actionFrench_triggered();
-    void on_actionTibetan_triggered();  // 添加藏文语言切换槽函数
-    void on_actionUyghur_triggered();  // 添加维吾尔语语言切换槽函数
-    void on_actionKazakh_triggered();  // 添加哈萨克语语言切换槽函数
-    void on_actionSyriac_triggered();
-    void on_actionSpanish_triggered();
-    void on_actionRussian_triggered();
+    void changeLanguage(QAction *action);
 
 private:
     Ui::MainWindow *ui;
@@ -104,8 +92,10 @@ private:
     PlayButtonDelegate *playDelegate;
     StatisticsWidget *statisticsWidget = nullptr;
     QMap<QString, QTranslator*> translators;
+    QActionGroup *languageActionGroup;
+
     void loadWordsFromCSV(const QString &filename);
     void saveWordsToCSV(const QString &filename);
-    void changeLanguage(const QString &languageCode);  // 添加语言切换方法
+    void setupLanguageActions();
 };
 #endif // MAINWINDOW_H
