@@ -32,7 +32,7 @@ Memorize is a powerful cross-platform vocabulary memorization software developed
 ### Development Framework
 - **Qt 6.10+**: Cross-platform C++ application framework
 - **C++17**: Modern C++ standard ensuring code quality and performance
-- **QMake**: Project build system
+
 
 ### Core Modules
 - **MainWindow**: Main interface and core logic control
@@ -106,12 +106,6 @@ We welcome all forms of contributions! Please follow these steps:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Development Team
-
-- **Lead Developer**: TheUserWW
-- **UI Design**: Modern interface based on Qt Designer
-- **Testing Team**: Looking for testers to join
 
 ---
 
