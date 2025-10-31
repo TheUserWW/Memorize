@@ -1,5 +1,8 @@
 # Memorize - Multi-language Vocabulary Memorization Software
 
+# Download Link
+https://www.softpedia.com/get/Others/Home-Education/Memorize-TheUserWW.shtml
+
 ## Project Overview
 
 Memorize is a powerful cross-platform vocabulary memorization software developed using the Qt framework, supporting multiple language learning modes. Designed specifically for language learners, this software provides an intuitive interface and rich features to help users efficiently memorize and master vocabulary.
