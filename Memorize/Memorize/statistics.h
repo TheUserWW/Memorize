@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QtCharts/QChart>
 #include <QtCharts/QLineSeries>
+#include <QtCharts/QScatterSeries>
 #include <QtCharts/QChartView>
 #include <QSettings>
 
@@ -37,6 +38,7 @@ private:
     Ui::StatisticsWidget *ui;
     QSettings *settings;
     QLineSeries *accuracySeries;
+    QScatterSeries *scatterSeries;
     QChart *chart;
     QChartView *chartView;
 

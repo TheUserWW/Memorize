@@ -5,6 +5,7 @@
 #include <QStyle>
 #include <QtCharts/QDateTimeAxis>
 #include <QtCharts/QValueAxis>
+#include <QtCharts/QScatterSeries>
 #include <QApplication>
 #include <QStandardPaths> // 添加QStandardPaths头文件
 
@@ -43,10 +44,20 @@ void StatisticsWidget::initChart()
     chart->legend()->setVisible(true);
     chart->legend()->setAlignment(Qt::AlignBottom);
 
-    // 创建数据系列
+    // 创建折线图系列（连接线）
     accuracySeries = new QLineSeries();
     accuracySeries->setName(tr("Accuracy"));
+    accuracySeries->setPen(QPen(QColor(0, 120, 215), 2)); // 蓝色线条，宽度2
     chart->addSeries(accuracySeries);
+
+    // 创建散点图系列（灰色小点）
+    scatterSeries = new QScatterSeries();
+    scatterSeries->setName(tr("Test Points"));
+    scatterSeries->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+    scatterSeries->setMarkerSize(4.8); // 点的大小（缩小40%，从8.0到4.8）
+    scatterSeries->setColor(QColor(128, 128, 128, 200)); // 灰色，半透明
+    scatterSeries->setBorderColor(QColor(64, 64, 64)); // 深灰色边框
+    chart->addSeries(scatterSeries);
 
     // 创建X轴（时间轴）
     QDateTimeAxis *axisX = new QDateTimeAxis;
@@ -55,6 +66,7 @@ void StatisticsWidget::initChart()
     axisX->setTickCount(5);
     chart->addAxis(axisX, Qt::AlignBottom);
     accuracySeries->attachAxis(axisX);
+    scatterSeries->attachAxis(axisX);
 
     // 创建Y轴（百分比轴）
     QValueAxis *axisY = new QValueAxis;
@@ -64,6 +76,7 @@ void StatisticsWidget::initChart()
     axisY->setTickCount(6);
     chart->addAxis(axisY, Qt::AlignLeft);
     accuracySeries->attachAxis(axisY);
+    scatterSeries->attachAxis(axisY);
 
     // 创建图表视图
     chartView = new QChartView(chart);
@@ -72,6 +85,12 @@ void StatisticsWidget::initChart()
 
 void StatisticsWidget::loadStatistics()
 {
+    // 添加安全检查，确保settings对象有效
+    if (!settings) {
+        qWarning() << "Settings object is null in loadStatistics";
+        return;
+    }
+
     settings->beginGroup("Statistics");
 
     // 加载基本统计数据
@@ -81,7 +100,12 @@ void StatisticsWidget::loadStatistics()
     highestAccuracy = settings->value("highestAccuracy", 0.0).toDouble();
 
     // 清除现有数据点
-    accuracySeries->clear();
+    if (accuracySeries) {
+        accuracySeries->clear();
+    }
+    if (scatterSeries) {
+        scatterSeries->clear();
+    }
 
     // 加载历史测试数据
     int size = settings->beginReadArray("history");
@@ -89,7 +113,12 @@ void StatisticsWidget::loadStatistics()
         settings->setArrayIndex(i);
         QDateTime date = settings->value("date").toDateTime();
         double accuracy = settings->value("accuracy").toDouble();
-        accuracySeries->append(date.toMSecsSinceEpoch(), accuracy);
+        if (accuracySeries) {
+            accuracySeries->append(date.toMSecsSinceEpoch(), accuracy);
+        }
+        if (scatterSeries) {
+            scatterSeries->append(date.toMSecsSinceEpoch(), accuracy);
+        }
     }
     settings->endArray();
 
@@ -141,7 +170,12 @@ void StatisticsWidget::addTestResult(double accuracy, int wordCount)
 
     // 添加新数据点
     QDateTime now = QDateTime::currentDateTime();
-    accuracySeries->append(now.toMSecsSinceEpoch(), accuracy);
+    if (accuracySeries) {
+        accuracySeries->append(now.toMSecsSinceEpoch(), accuracy);
+    }
+    if (scatterSeries) {
+        scatterSeries->append(now.toMSecsSinceEpoch(), accuracy);
+    }
 
     // 调整图表范围
     adjustChartRange();
@@ -217,7 +251,12 @@ void StatisticsWidget::on_ResetButton_clicked()
         totalWords = 0;
         cumulativeAccuracy = 0.0;
         highestAccuracy = 0.0;
-        accuracySeries->clear();
+        if (accuracySeries) {
+            accuracySeries->clear();
+        }
+        if (scatterSeries) {
+            scatterSeries->clear();
+        }
 
         // 保存清空后的数据并更新UI
         saveStatistics();
