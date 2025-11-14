@@ -87,6 +87,7 @@ void TestWidget::startTest()
     currentQuestion = 0;
     correctAnswers = 0;
     testHistory.clear();  // 清空测试历史
+    testedWords.clear();  // 清空已测试单词记录
     startTime = QTime::currentTime();
 
     // 获取测试参数
@@ -117,9 +118,25 @@ void TestWidget::updateQuestion()
 
     ui->progressLabel->setText(QString("Question %1/%2").arg(currentQuestion + 1).arg(questionCount));
 
-    // 随机选择单词
-    int wordIndex = QRandomGenerator::global()->bounded(wordModel->rowCount());
-    currentWord = wordModel->item(wordIndex, 0)->text(); // 第0列: 单词
+    // 确保选择未测试过的单词
+    int wordIndex;
+    int attempts = 0;
+    const int maxAttempts = wordModel->rowCount() * 2; // 防止无限循环
+    
+    do {
+        wordIndex = QRandomGenerator::global()->bounded(wordModel->rowCount());
+        currentWord = wordModel->item(wordIndex, 0)->text(); // 第0列: 单词
+        attempts++;
+        
+        // 如果所有单词都已测试过，则重置哈希表
+        if (attempts >= maxAttempts && testedWords.size() >= wordModel->rowCount()) {
+            testedWords.clear();
+            attempts = 0;
+        }
+    } while (testedWords.contains(currentWord) && attempts < maxAttempts);
+    
+    // 记录当前单词已被测试
+    testedWords[currentWord] = true;
     currentMeaning = wordModel->item(wordIndex, 3)->text(); // 第3列: 词义
 
     // 清除之前的选项

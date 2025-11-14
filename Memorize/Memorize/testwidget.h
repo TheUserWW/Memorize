@@ -57,6 +57,9 @@ private:
         bool isCorrect;
     };
     QList<TestResult> testHistory;
+    
+    // 添加哈希表记录已测试的单词，确保每个单词只测试一次
+    QHash<QString, bool> testedWords;
 
     void clearOptions();
 };
